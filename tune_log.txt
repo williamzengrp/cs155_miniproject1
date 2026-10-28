@@ -1,0 +1,38 @@
+unparsed dates: 0
+unparsed dates: 0
+positive (High) rate: 0.352
+dropping non-numeric columns: []
+features: ['time_signature', 'speechiness', 'danceability', 'duration_ms', 'energy', 'mode', 'instrumentalness', 'valence', 'key', 'tempo', 'loudness', 'acousticness', 'liveness', 'release_year', 'release_month', 'days_since_release', 'is_jan1']
+[tune] xgb   best CV AUC 0.82816  {'n_estimators': 2948, 'learning_rate': 0.002560865133823509, 'max_depth': 9, 'min_child_weight': 0.5154781362883841, 'subsample': 0.6013394449286265, 'colsample_bytree': 0.7528487244250747, 'gamma': 2.826761884521424e-06, 'reg_alpha': 6.708782519667388e-08, 'reg_lambda': 0.0016498061631050318}
+[tune] lgbm  best CV AUC 0.82747  {'n_estimators': 1478, 'learning_rate': 0.0041638925646390705, 'num_leaves': 32, 'max_depth': 10, 'min_child_samples': 16, 'subsample': 0.6842051796034306, 'colsample_bytree': 0.803456495067946, 'reg_alpha': 1.3023665876309299e-05, 'reg_lambda': 9.96347025531551e-07}
+[tune] cat   best CV AUC 0.82850  {'iterations': 695, 'learning_rate': 0.025596071092189792, 'depth': 6, 'l2_leaf_reg': 5.01181750537625, 'random_strength': 2.1540681467303853, 'bagging_temperature': 0.2840943249450554}
+[tune] et    best CV AUC 0.81971  {'n_estimators': 900, 'max_depth': 30, 'min_samples_leaf': 3, 'max_features': 0.6826220275537702, 'criterion': 'entropy'}
+[tune] rf    best CV AUC 0.82645  {'n_estimators': 500, 'max_depth': 16, 'min_samples_leaf': 2, 'max_features': 0.30494572143445103, 'criterion': 'entropy'}
+[tune] lr    best CV AUC 0.76802  {'C': 7.143218707895726}
+[oof]  xgb   AUC 0.83099  (fold mean 0.82770 +- 0.01141)
+[oof]  lgbm  AUC 0.83064  (fold mean 0.82756 +- 0.01174)
+[oof]  cat   AUC 0.82824  (fold mean 0.82420 +- 0.01134)
+[oof]  et    AUC 0.82227  (fold mean 0.81990 +- 0.01173)
+[oof]  rf    AUC 0.83054  (fold mean 0.82783 +- 0.01286)
+[oof]  lr    AUC 0.76727  (fold mean 0.76714 +- 0.01862)
+
+blend weights: {'xgb': np.float64(0.149), 'lgbm': np.float64(0.3), 'cat': np.float64(0.184), 'et': np.float64(0.095), 'rf': np.float64(0.26), 'lr': np.float64(0.011)}
+
+=== out-of-sample AUC (3x5-fold grouped CV, folds unseen by tuning) ===
+  xgb                            0.83099
+  lgbm                           0.83064
+  cat                            0.82824
+  et                             0.82227
+  rf                             0.83054
+  lr                             0.76727
+  mean of all (rank avg)         0.83042
+  mean of GBMs (rank avg)        0.83136
+  weighted rank blend (nested)   0.83222
+
+using: weighted rank blend (nested)  weights={'xgb': np.float64(0.149), 'lgbm': np.float64(0.3), 'cat': np.float64(0.184), 'et': np.float64(0.095), 'rf': np.float64(0.26), 'lr': np.float64(0.011)}
+   ID  Popularity_Type
+0   2         0.833403
+1   3         0.469755
+2   4         0.836705
+3   5         0.944736
+4   6         0.513884
