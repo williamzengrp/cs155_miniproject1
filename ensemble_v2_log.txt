@@ -1,0 +1,56 @@
+  te=True fold 1/15 done
+  te=True fold 2/15 done
+  te=True fold 3/15 done
+  te=True fold 4/15 done
+  te=True fold 5/15 done
+  te=True fold 6/15 done
+  te=True fold 7/15 done
+  te=True fold 8/15 done
+  te=True fold 9/15 done
+  te=True fold 10/15 done
+  te=True fold 11/15 done
+  te=True fold 12/15 done
+  te=True fold 13/15 done
+  te=True fold 14/15 done
+  te=True fold 15/15 done
+  te=False fold 1/15 done
+  te=False fold 2/15 done
+  te=False fold 3/15 done
+  te=False fold 4/15 done
+  te=False fold 5/15 done
+  te=False fold 6/15 done
+  te=False fold 7/15 done
+  te=False fold 8/15 done
+  te=False fold 9/15 done
+  te=False fold 10/15 done
+  te=False fold 11/15 done
+  te=False fold 12/15 done
+  te=False fold 13/15 done
+  te=False fold 14/15 done
+  te=False fold 15/15 done
+[oof] xgb   te=True  AUC 0.85323
+[oof] lgbm  te=True  AUC 0.85211
+[oof] cat   te=True  AUC 0.84964
+[oof] et    te=True  AUC 0.84382
+[oof] rf    te=True  AUC 0.84945
+[oof] svm   te=True  AUC 0.80683
+[oof] mlp   te=True  AUC 0.81658
+[oof] knn   te=True  AUC 0.76182
+[oof] xgb   te=False AUC 0.84974
+[oof] lgbm  te=False AUC 0.85034
+[oof] cat   te=False AUC 0.84703
+[oof] et    te=False AUC 0.84457
+[oof] rf    te=False AUC 0.85105
+[oof] svm   te=False AUC 0.79447
+[oof] mlp   te=False AUC 0.80805
+[oof] knn   te=False AUC 0.73918
+
+=== submissions ===
+  1_blend_te.csv           CV AUC 0.85463
+     weights {'xgb': 0.541, 'lgbm': 0.039, 'cat': 0.038, 'et': 0.231, 'rf': 0.083, 'svm': 0.055, 'mlp': 0.013, 'knn': 0.0}
+  2_stack_te.csv           CV AUC 0.85558
+  3_mean_trees_te.csv      CV AUC 0.85522
+  4_blend_noTE_alt.csv     CV AUC 0.85479
+     weights {'xgb': 0.394, 'lgbm': 0.071, 'cat': 0.041, 'et': 0.294, 'rf': 0.191, 'svm': 0.0, 'mlp': 0.008, 'knn': 0.0}
+  5_full_refit_te.csv      CV AUC 0.85463
+  (5 has the same CV estimate as 1: same models and weights, trained on all rows)

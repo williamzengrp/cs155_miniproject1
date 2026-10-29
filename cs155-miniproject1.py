@@ -25,6 +25,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import QuantileTransformer
 from xgboost import XGBClassifier
 
+from time_features import FEATURE_GROUPS, build_features
+
 warnings.filterwarnings('ignore')
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 pd.set_option('display.max_columns', None)
@@ -35,7 +37,7 @@ parser.add_argument('--trials', type=int, default=60, help='Optuna trials per mo
 args = parser.parse_args()
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PARAMS_FILE = os.path.join(HERE, 'best_params.json')
+PARAMS_FILE = os.path.join(HERE, 'best_params_v3.json')   # tuned on FEATURE_GROUPS
 N_JOBS = -1
 
 data_tr = pd.read_csv(os.path.join(HERE, 'train.csv'))
@@ -48,38 +50,19 @@ TARGET = 'Popularity_Type'
 data_tr = data_tr.dropna(subset=[TARGET]).reset_index(drop=True)
 groups = pd.factorize(data_tr['uri'])[0]
 
-# ---------- 2. drop useless columns ----------
-drop_cols = ['track_href', 'uri', 'analysis_url', 'type']
-data_tr = data_tr.drop(columns=drop_cols, errors='ignore')
-data_te = data_te.drop(columns=drop_cols, errors='ignore')
-
-# ---------- 3. release date -> numbers ----------
-def parse_date(s):
-    d = pd.to_datetime(s, format='%m/%d/%Y', errors='coerce')                 # 5/23/2024
-    d = d.fillna(pd.to_datetime(s, format='mixed', errors='coerce'))          # anything else
-    return d
-
-for df in (data_tr, data_te):
-    d = parse_date(df['track_album_release_date'])
-    print('unparsed dates:', d.isna().sum())
-    df['release_year'] = d.dt.year
-    df['release_month'] = d.dt.month
-    df['days_since_release'] = (pd.Timestamp('2025-01-01') - d).dt.days
-    df['is_jan1'] = ((d.dt.month == 1) & (d.dt.day == 1)).astype(int)
-    df.drop(columns=['track_album_release_date'], inplace=True)
+# ---------- 2-3. audio + time-series features from the release date (see time_features.py) ----------
+# trend (continuous time, age), seasonality (month / weekday / day-of-year, cyclic encodings,
+# release-day flags) and release density (songs sharing the date / month / year, from train+test).
+# Ablation (feature_ablation.py): density +0.017 AUC, seasonality +0.011, album look-alike counts
+# +0.006 to +0.010; precision / detrended ~0.
+X, X_test = build_features(data_tr, data_te, FEATURE_GROUPS)
 
 # ---------- 4. target: High popularity = 1 (as in the assignment spec) ----------
 y = (data_tr[TARGET] == 'High').astype(int).to_numpy()
 print('positive (High) rate: %.3f' % y.mean())
 
-# ---------- 5. features: same columns in train and test ----------
-features = [c for c in data_tr.columns if c not in (TARGET, 'ID') and c in data_te.columns]
-leftover = data_tr[features].select_dtypes(include='object').columns.tolist()
-print('dropping non-numeric columns:', leftover)
-features = [c for c in features if c not in leftover]
-
-X = data_tr[features].reset_index(drop=True)
-X_test = data_te[features].reset_index(drop=True)
+# ---------- 5. features ----------
+features = X.columns.tolist()
 # linear / sklearn-tree models cannot take NaN; boosters handle it natively
 fill = X.median()
 X_filled, X_test_filled = X.fillna(fill), X_test.fillna(fill)
@@ -283,3 +266,5 @@ p_test = T @ weights          # rank-blended score in (0, 1]; AUC only depends o
 sub = pd.DataFrame({'ID': data_te['ID'], TARGET: p_test})
 sub.to_csv(os.path.join(HERE, 'predictions.csv'), index=False)
 print(sub.head())
+with open(os.path.join(HERE, 'blend_weights.json'), 'w') as f:   # reused by refit_full.py
+    json.dump({n: round(float(w), 3) for n, w in zip(MODELS, weights)}, f)

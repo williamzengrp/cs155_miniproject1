@@ -1,0 +1,50 @@
+{
+  "xgb": {
+    "n_estimators": 2181,
+    "learning_rate": 0.00788745045825223,
+    "max_depth": 4,
+    "min_child_weight": 2.7243504446717353,
+    "subsample": 0.7799768933313034,
+    "colsample_bytree": 0.6278817082179975,
+    "gamma": 0.0010948523393442648,
+    "reg_alpha": 1.3197285987361807e-06,
+    "reg_lambda": 0.051533947682583854
+  },
+  "lgbm": {
+    "n_estimators": 677,
+    "learning_rate": 0.01061535868269228,
+    "num_leaves": 23,
+    "max_depth": 6,
+    "min_child_samples": 8,
+    "subsample": 0.6713568242734371,
+    "colsample_bytree": 0.6496336550242067,
+    "reg_alpha": 4.0273234670129614e-05,
+    "reg_lambda": 4.351934468270392e-06,
+    "subsample_freq": 1
+  },
+  "cat": {
+    "iterations": 2181,
+    "learning_rate": 0.011069140872159626,
+    "depth": 4,
+    "l2_leaf_reg": 0.11211300266111657,
+    "random_strength": 0.007272443394088692,
+    "bagging_temperature": 1.9513374056782409
+  },
+  "et": {
+    "n_estimators": 500,
+    "max_depth": 16,
+    "min_samples_leaf": 3,
+    "max_features": 0.5967729787688397,
+    "criterion": "entropy"
+  },
+  "rf": {
+    "n_estimators": 700,
+    "max_depth": 26,
+    "min_samples_leaf": 1,
+    "max_features": 0.26970343976123257,
+    "criterion": "entropy"
+  },
+  "lr": {
+    "C": 0.08264328927007726
+  }
+}

@@ -1,0 +1,56 @@
+  te=True fold 1/15 done
+  te=True fold 2/15 done
+  te=True fold 3/15 done
+  te=True fold 4/15 done
+  te=True fold 5/15 done
+  te=True fold 6/15 done
+  te=True fold 7/15 done
+  te=True fold 8/15 done
+  te=True fold 9/15 done
+  te=True fold 10/15 done
+  te=True fold 11/15 done
+  te=True fold 12/15 done
+  te=True fold 13/15 done
+  te=True fold 14/15 done
+  te=True fold 15/15 done
+  te=False fold 1/15 done
+  te=False fold 2/15 done
+  te=False fold 3/15 done
+  te=False fold 4/15 done
+  te=False fold 5/15 done
+  te=False fold 6/15 done
+  te=False fold 7/15 done
+  te=False fold 8/15 done
+  te=False fold 9/15 done
+  te=False fold 10/15 done
+  te=False fold 11/15 done
+  te=False fold 12/15 done
+  te=False fold 13/15 done
+  te=False fold 14/15 done
+  te=False fold 15/15 done
+[oof] xgb   te=True  AUC 0.86021
+[oof] lgbm  te=True  AUC 0.85985
+[oof] cat   te=True  AUC 0.85987
+[oof] et    te=True  AUC 0.85570
+[oof] rf    te=True  AUC 0.85693
+[oof] svm   te=True  AUC 0.82068
+[oof] mlp   te=True  AUC 0.83448
+[oof] knn   te=True  AUC 0.79227
+[oof] xgb   te=False AUC 0.85854
+[oof] lgbm  te=False AUC 0.85941
+[oof] cat   te=False AUC 0.86005
+[oof] et    te=False AUC 0.85606
+[oof] rf    te=False AUC 0.85618
+[oof] svm   te=False AUC 0.80960
+[oof] mlp   te=False AUC 0.82864
+[oof] knn   te=False AUC 0.77422
+
+=== submissions ===
+  prediction_6.csv         CV AUC 0.86293
+     weights {'xgb': 0.241, 'lgbm': 0.176, 'cat': 0.192, 'et': 0.279, 'rf': 0.057, 'svm': 0.001, 'mlp': 0.054, 'knn': 0.0}
+  prediction_7.csv         CV AUC 0.86274
+  prediction_8.csv         CV AUC 0.86287
+  prediction_9.csv         CV AUC 0.86302
+     weights {'xgb': 0.354, 'lgbm': 0.024, 'cat': 0.196, 'et': 0.284, 'rf': 0.091, 'svm': 0.0, 'mlp': 0.052, 'knn': 0.0}
+  prediction_10.csv        CV AUC 0.86293
+  (5 has the same CV estimate as 1: same models and weights, trained on all rows)

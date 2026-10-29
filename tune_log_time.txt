@@ -1,0 +1,35 @@
+positive (High) rate: 0.352
+features: ['time_signature', 'speechiness', 'danceability', 'duration_ms', 'energy', 'mode', 'instrumentalness', 'valence', 'key', 'tempo', 'loudness', 'acousticness', 'liveness', 'release_year', 'release_month', 'days_since_release', 'is_jan1', 't_frac_year', 't_log_age', 't_decade', 's_dow', 's_doy', 's_week', 's_quarter', 's_day', 's_mon_sin', 's_mon_cos', 's_dow_sin', 's_dow_cos', 's_doy_sin', 's_doy_cos', 's_is_friday', 's_is_tuesday', 's_holiday', 's_summer', 'n_same_date', 'n_same_month', 'n_same_year', 'n_same_date_audio']
+[tune] xgb   best CV AUC 0.84663  {'n_estimators': 2181, 'learning_rate': 0.00788745045825223, 'max_depth': 4, 'min_child_weight': 2.7243504446717353, 'subsample': 0.7799768933313034, 'colsample_bytree': 0.6278817082179975, 'gamma': 0.0010948523393442648, 'reg_alpha': 1.3197285987361807e-06, 'reg_lambda': 0.051533947682583854}
+[tune] lgbm  best CV AUC 0.84597  {'n_estimators': 677, 'learning_rate': 0.01061535868269228, 'num_leaves': 23, 'max_depth': 6, 'min_child_samples': 8, 'subsample': 0.6713568242734371, 'colsample_bytree': 0.6496336550242067, 'reg_alpha': 4.0273234670129614e-05, 'reg_lambda': 4.351934468270392e-06}
+[tune] cat   best CV AUC 0.84607  {'iterations': 2181, 'learning_rate': 0.011069140872159626, 'depth': 4, 'l2_leaf_reg': 0.11211300266111657, 'random_strength': 0.007272443394088692, 'bagging_temperature': 1.9513374056782409}
+[tune] et    best CV AUC 0.83977  {'n_estimators': 500, 'max_depth': 16, 'min_samples_leaf': 3, 'max_features': 0.5967729787688397, 'criterion': 'entropy'}
+[tune] rf    best CV AUC 0.84426  {'n_estimators': 700, 'max_depth': 26, 'min_samples_leaf': 1, 'max_features': 0.26970343976123257, 'criterion': 'entropy'}
+[tune] lr    best CV AUC 0.79529  {'C': 0.08264328927007726}
+[oof]  xgb   AUC 0.84974  (fold mean 0.84637 +- 0.00997)
+[oof]  lgbm  AUC 0.85034  (fold mean 0.84727 +- 0.01034)
+[oof]  cat   AUC 0.84703  (fold mean 0.84127 +- 0.01077)
+[oof]  et    AUC 0.84457  (fold mean 0.84121 +- 0.01087)
+[oof]  rf    AUC 0.85105  (fold mean 0.84823 +- 0.01059)
+[oof]  lr    AUC 0.79795  (fold mean 0.79759 +- 0.01027)
+
+blend weights: {'xgb': 0.355, 'lgbm': 0.061, 'cat': 0.059, 'et': 0.326, 'rf': 0.176, 'lr': 0.022}
+
+=== out-of-sample AUC (3x5-fold grouped CV, folds unseen by tuning) ===
+  xgb                            0.84974
+  lgbm                           0.85034
+  cat                            0.84703
+  et                             0.84457
+  rf                             0.85105
+  lr                             0.79795
+  mean of all (rank avg)         0.85347
+  mean of GBMs (rank avg)        0.85059
+  weighted rank blend (nested)   0.85471
+
+using: weighted rank blend (nested)  weights={'xgb': 0.355, 'lgbm': 0.061, 'cat': 0.059, 'et': 0.326, 'rf': 0.176, 'lr': 0.022}
+   ID  Popularity_Type
+0   2         0.684413
+1   3         0.717632
+2   4         0.769677
+3   5         0.951750
+4   6         0.525877
