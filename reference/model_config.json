@@ -1,0 +1,30 @@
+{
+  "cat": {
+    "family": "cat",
+    "view": "project",
+    "duplicate_power": 0.0,
+    "residual_alpha": 0.35,
+    "residual_bandwidth": 0.75,
+    "residual_shrinkage": 10.0,
+    "rounds": 2000,
+    "lr": 0.008884634139277769,
+    "depth": 9,
+    "l2": 9.883292087592952,
+    "colsample": 0.47172714535307114,
+    "random_strength": 0.6053025553226985,
+    "borders": 128
+  },
+  "extra": {
+    "family": "extra",
+    "view": "project",
+    "duplicate_power": 1.0,
+    "residual_alpha": 0.15,
+    "residual_bandwidth": 3.0,
+    "residual_shrinkage": 3.0,
+    "rounds": 900,
+    "depth": 15,
+    "min_leaf": 2,
+    "colsample": 0.1827077108658931
+  },
+  "extra_weight": 0.4
+}

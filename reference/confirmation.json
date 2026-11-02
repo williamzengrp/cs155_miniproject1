@@ -1,0 +1,135 @@
+{
+  "warning": "Selection-biased CV on reused labels. Unlabeled test features are pooled.",
+  "results": {
+    "reference_60_40": {
+      "fold_auc": [
+        0.852222026535165,
+        0.8465018492426912,
+        0.8657207643536456,
+        0.8699072443348597,
+        0.877348623785639
+      ],
+      "mean_auc": 0.8623401016504001,
+      "config": {
+        "cat": {
+          "family": "cat",
+          "view": "project",
+          "duplicate_power": 0.0,
+          "residual_alpha": 0.35,
+          "residual_bandwidth": 0.75,
+          "residual_shrinkage": 10.0,
+          "rounds": 2000,
+          "lr": 0.008884634139277769,
+          "depth": 9,
+          "l2": 9.883292087592952,
+          "colsample": 0.47172714535307114,
+          "random_strength": 0.6053025553226985,
+          "borders": 128
+        },
+        "extra": {
+          "family": "extra",
+          "view": "project",
+          "duplicate_power": 1.0,
+          "residual_alpha": 0.15,
+          "residual_bandwidth": 3.0,
+          "residual_shrinkage": 3.0,
+          "rounds": 900,
+          "depth": 15,
+          "min_leaf": 2,
+          "colsample": 0.1827077108658931
+        },
+        "extra_weight": 0.4
+      }
+    },
+    "extra_tuned": {
+      "fold_auc": [
+        0.8521339673593988,
+        0.8465458788305741,
+        0.8664766056123048,
+        0.869459610191382,
+        0.8767299349640204
+      ],
+      "mean_auc": 0.862269199391536,
+      "config": {
+        "cat": {
+          "family": "cat",
+          "view": "project",
+          "duplicate_power": 0.0,
+          "residual_alpha": 0.35,
+          "residual_bandwidth": 0.75,
+          "residual_shrinkage": 10.0,
+          "rounds": 2000,
+          "lr": 0.008884634139277769,
+          "depth": 9,
+          "l2": 9.883292087592952,
+          "colsample": 0.47172714535307114,
+          "random_strength": 0.6053025553226985,
+          "borders": 128
+        },
+        "extra": {
+          "family": "extra",
+          "view": "project",
+          "duplicate_power": 1.0,
+          "residual_alpha": 0.15,
+          "residual_bandwidth": 3.0,
+          "residual_shrinkage": 3.0,
+          "rounds": 900,
+          "depth": 15,
+          "min_leaf": 2,
+          "colsample": 0.28487773449590825
+        },
+        "extra_weight": 0.4,
+        "fold_auc": [
+          0.8573869381316139,
+          0.84773228978527,
+          0.8559516728133139
+        ]
+      }
+    },
+    "cat_tuned": {
+      "fold_auc": [
+        0.8508497710461431,
+        0.8472503522367031,
+        0.8657134260889985,
+        0.8691367265469062,
+        0.8796392454942513
+      ],
+      "mean_auc": 0.8625179042826006,
+      "config": {
+        "cat": {
+          "family": "cat",
+          "view": "project",
+          "duplicate_power": 0.0,
+          "residual_alpha": 0.35,
+          "residual_bandwidth": 0.75,
+          "residual_shrinkage": 10.0,
+          "rounds": 1600,
+          "lr": 0.006604684273373236,
+          "depth": 7,
+          "l2": 7.317914531133623,
+          "colsample": 0.695014926527203,
+          "random_strength": 0.41749255216548786,
+          "borders": 128
+        },
+        "extra": {
+          "family": "extra",
+          "view": "project",
+          "duplicate_power": 1.0,
+          "residual_alpha": 0.15,
+          "residual_bandwidth": 3.0,
+          "residual_shrinkage": 3.0,
+          "rounds": 900,
+          "depth": 15,
+          "min_leaf": 2,
+          "colsample": 0.28487773449590825
+        },
+        "extra_weight": 0.35000000000000003,
+        "fold_auc": [
+          0.8574742854722845,
+          0.8490948171150332,
+          0.855650288826321
+        ]
+      }
+    }
+  }
+}
