@@ -1,0 +1,10 @@
+[catfull k=0] n=3863 m=863 fit=3090 val=773 elig=716  setup 3.0s
+   cached cat val AUC(elig) 0.82806
+   run c/cat ncol 121 232.2s
+   cat2000 val-flipped vs cache raw_v  max|diff| = 0.000e+00
+   cat2000 val-flipped vs cache v      max|diff| = 0.000e+00
+   cat2000 val-flipped vs cache ip     max|diff| = 0.000e+00
+   cat2000 val-flipped vs cache raw_t  max|diff| = 0.000e+00
+   cat2000 val-flipped vs cache t      max|diff| = 0.000e+00
+   val-flipped AUC(elig) 0.82806
+[catfull k=0] done 235.2s

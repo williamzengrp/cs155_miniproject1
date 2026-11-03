@@ -1,0 +1,10 @@
+fold 0: fit 3090 val 773 elig 716
+[flip] matrices maxdiff fit 0 val 0 test 0
+[flip] inner sets maxdiff [(0.0, 0.0, True), (0.0, 0.0, True), (0.0, 0.0, True)]
+[flip] ET a: raw_v 5.55e-17 ip 5.55e-17 v 5.55e-17 t 1.11e-16
+[repro] ET a vs cache a_k0.npz: v 5.55e-17 t 1.11e-16 ip 0  AUC true-run val 0.83537
+[flip] variant c matrices maxdiff fit 0 val 0 test 0  (16s)
+[shuffle] et(a) val AUC (elig, true labels): raw 0.4837 corrected 0.4860  (8s)
+[shuffle] cat(c) val AUC (elig, true labels): raw 0.4985 corrected 0.4984  (115s)
+[shuffle] MIX 0.6cat+0.4et val AUC 0.4941; null SE ~ 0.0233
+[true-run cache] mix val AUC 0.8341

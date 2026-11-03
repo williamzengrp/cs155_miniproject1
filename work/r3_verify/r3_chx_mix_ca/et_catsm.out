@@ -1,0 +1,36 @@
+[et k=0] n=3863 m=863 fit=3090 val=773 elig=716  setup 3.7s
+   cache file a_k0.npz; cached val AUC(elig) 0.83537
+   run a/extra ncol 124 24.7s
+   val-flipped vs cache         raw_v  max|diff| = 0.000e+00
+   val-flipped vs cache         v      max|diff| = 0.000e+00
+   val-flipped vs cache         ip     max|diff| = 0.000e+00
+   val-flipped vs cache         raw_t  max|diff| = 0.000e+00
+   val-flipped vs cache         t      max|diff| = 0.000e+00
+   val-flipped AUC(elig, true labels) 0.83537
+   run a/extra ncol 124 32.2s
+   FIT-PERMUTED AUC(elig): corrected 0.48603  raw 0.48370
+[et k=0] done 60.6s
+[catsm k=0] n=3863 m=863 fit=3090 val=773 elig=716  setup 4.6s
+   run c/cat ncol 121 25.4s
+   run c/cat ncol 121 27.0s
+   cat200 val-flipped vs base   raw_v  max|diff| = 0.000e+00
+   cat200 val-flipped vs base   v      max|diff| = 0.000e+00
+   cat200 val-flipped vs base   ip     max|diff| = 0.000e+00
+   cat200 val-flipped vs base   raw_t  max|diff| = 0.000e+00
+   cat200 val-flipped vs base   t      max|diff| = 0.000e+00
+   base AUC(elig) 0.82167  val-flipped AUC(elig) 0.82167
+   run c/cat ncol 121 23.0s
+   FIT-PERMUTED AUC(elig): corrected 0.48487  raw 0.48558
+[catsm k=0] done 80.0s
+[et k=7] n=3863 m=863 fit=3090 val=773 elig=701  setup 3.5s
+   cache file et_a_k7.npz; cached val AUC(elig) 0.83207
+   run a/extra ncol 124 25.2s
+   val-flipped vs cache         raw_v  max|diff| = 0.000e+00
+   val-flipped vs cache         v      max|diff| = 0.000e+00
+   val-flipped vs cache         ip     max|diff| = 0.000e+00
+   val-flipped vs cache         raw_t  max|diff| = 0.000e+00
+   val-flipped vs cache         t      max|diff| = 0.000e+00
+   val-flipped AUC(elig, true labels) 0.83207
+   run a/extra ncol 124 24.1s
+   FIT-PERMUTED AUC(elig): corrected 0.47745  raw 0.47760
+[et k=7] done 52.8s

@@ -1,0 +1,2 @@
+fold 0: fit 3090 val 773 elig 716
+[repro] cat raw val vs cache c_k0: maxdiff 0  corr 1.000000  AUC elig 0.82819 vs cache 0.82819  c_alb importance 1.88 (rank 14/122)  (44s)

@@ -1,0 +1,7 @@
+each row in exactly one val fold per repeat: True
+oof identical to saved: True 0.0
+saved aucs: [0.83803 0.84277 0.84064 0.84645 0.84098]  recomputed: [0.83803 0.84277 0.84064 0.84645 0.84098]
+test_full == mean of 3 full-refit seeds: 0.0  len 863 863
+test_foldavg max diff: 0.0
+full-refit files keys: ['cat_raw_t', 'cat_ip', 'cat_t', 'et_raw_t', 'et_ip', 'et_t']  ip lengths (must be n=3863): [3863, 3863, 3863]
+corr(test_full, test_foldavg): 0.9973722023990365

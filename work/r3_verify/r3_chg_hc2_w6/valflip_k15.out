@@ -1,0 +1,23 @@
+fold 15: n_fit 3090 n_val 773 n_elig 711
+cached fold AUCs (true labels): {'cat_raw_v': 0.84547, 'et_raw_v': 0.84082, 'cat_v': 0.84551, 'et_v': 0.841, 'w6_blend': 0.84723}
+  input Xf shape (3090, 122) identical: True
+  input Xv shape (773, 122) identical: True
+  input Xt shape (863, 122) identical: True
+  inner sets (it, iv, I, J) identical: True
+  y[fit] identical: True  val labels differ: 1.0
+  eligible val nodes seeded (must be 0): 0  non-eligible val nodes seeded: 62 of 62
+  standalone g_hc2 val AUC (true labels, eligible): 0.80976
+  cat done 206.9s
+  extra done 15.6s
+  cat_raw_v  max|diff| vs cached true-label fold: 0.000e+00  identical: True
+  et_raw_v   max|diff| vs cached true-label fold: 0.000e+00  identical: True
+  cat_ip     max|diff| vs cached true-label fold: 0.000e+00  identical: True
+  et_ip      max|diff| vs cached true-label fold: 0.000e+00  identical: True
+  cat_v      max|diff| vs cached true-label fold: 0.000e+00  identical: True
+  et_v       max|diff| vs cached true-label fold: 0.000e+00  identical: True
+  cat_raw_t  max|diff| vs cached true-label fold: 0.000e+00  identical: True
+  et_raw_t   max|diff| vs cached true-label fold: 0.000e+00  identical: True
+  cat_t      max|diff| vs cached true-label fold: 0.000e+00  identical: True
+  et_t       max|diff| vs cached true-label fold: 0.000e+00  identical: True
+valflip AUCs (true labels): {'cat_raw_v': 0.84547, 'et_raw_v': 0.84082, 'cat_v': 0.84551, 'et_v': 0.841, 'w6_blend': 0.84723}
+total 241.1s

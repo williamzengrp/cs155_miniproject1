@@ -1,0 +1,5 @@
+fold 0: fit 3090 val 773 elig 716
+[flip-cat] c(flipped val labels) vs cached true-label c_k0: raw_v 0 ip 0 v 0 t 0; AUC val 0.82806 vs cached 0.82806 (200s)
+[cols] PROJECT ncol 115; suspicious-name cols ['is_friday', 'is_holiday', 'loudness_energy_residual']; max single-col AUC dev [('loudness', 0.6805130922238913), ('instrumentalness', 0.3252898379516982), ('acousticness', 0.3421883338387792), ('decade', 0.3493102720709411), ('same_date_mean_instrumentalness', 0.35581333295718753)]
+[cols] train.csv columns: ['time_signature', 'speechiness', 'danceability', 'duration_ms', 'energy', 'track_href', 'mode', 'uri', 'type', 'track_album_release_date', 'analysis_url', 'instrumentalness', 'valence', 'key', 'tempo', 'loudness', 'acousticness', 'liveness', 'Popularity_Type']
+[alb] n albums 3294, train-only 2517; corr(alb code, row index) -0.010

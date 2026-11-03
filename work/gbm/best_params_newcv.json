@@ -1,0 +1,152 @@
+{
+ "lgbm": {
+  "params": {
+   "n_estimators": 662,
+   "learning_rate": 0.016526523473718135,
+   "num_leaves": 30,
+   "max_depth": 9,
+   "min_child_samples": 7,
+   "subsample": 0.7507042406128182,
+   "colsample_bytree": 0.7156054252383296,
+   "reg_alpha": 3.000236118629442e-07,
+   "reg_lambda": 0.10439010449441657,
+   "subsample_freq": 1
+  },
+  "source": "teammates best_params_v3.json (re-tune not robustly better)",
+  "weighting": "none",
+  "n_seeds": 5,
+  "final_fit": "refit on ALL training rows (no early stopping), mean of 5 seeds",
+  "tuned_candidate": {
+   "n_estimators": 778,
+   "learning_rate": 0.008827573766394148,
+   "num_leaves": 45,
+   "max_depth": 8,
+   "min_child_samples": 6,
+   "subsample": 0.7597606669378333,
+   "subsample_freq": 1,
+   "colsample_bytree": 0.7199844782433649,
+   "reg_alpha": 6.260015692454651e-08,
+   "reg_lambda": 0.3548056910291135
+  },
+  "cv_5x5_v1_67feats": {
+   "tuned": 0.83423,
+   "teammate": 0.8333,
+   "diff": 0.00093,
+   "pos": "3/5"
+  },
+  "cv_5x5_v2_55feats": {
+   "tuned": 0.83664,
+   "teammate": 0.83632,
+   "diff": 0.00032,
+   "pos": "4/5"
+  }
+ },
+ "xgb": {
+  "params": {
+   "n_estimators": 1795,
+   "learning_rate": 0.004772621772693365,
+   "max_depth": 8,
+   "min_child_weight": 2.6333826625491255,
+   "subsample": 0.7885094204410342,
+   "colsample_bytree": 0.38512913135288424,
+   "gamma": 6.798633927810482e-05,
+   "reg_alpha": 0.2904237174364621,
+   "reg_lambda": 0.03547941029571447
+  },
+  "source": "Optuna re-tune under test-mimicking CV, pick t34",
+  "weighting": "none",
+  "n_seeds": 5,
+  "final_fit": "refit on ALL training rows (no early stopping), mean of 5 seeds",
+  "tuned_candidate": {
+   "n_estimators": 1795,
+   "learning_rate": 0.004772621772693365,
+   "max_depth": 8,
+   "min_child_weight": 2.6333826625491255,
+   "subsample": 0.7885094204410342,
+   "colsample_bytree": 0.38512913135288424,
+   "gamma": 6.798633927810482e-05,
+   "reg_alpha": 0.2904237174364621,
+   "reg_lambda": 0.03547941029571447
+  },
+  "cv_5x5_v1_67feats": {
+   "tuned": 0.83575,
+   "teammate": 0.83265,
+   "diff": 0.0031,
+   "pos": "5/5"
+  },
+  "cv_5x5_v2_55feats": {
+   "tuned": 0.8381,
+   "teammate": 0.83302,
+   "diff": 0.00507,
+   "pos": "5/5"
+  }
+ },
+ "cat": {
+  "params": {
+   "iterations": 823,
+   "learning_rate": 0.02562740498192113,
+   "depth": 7,
+   "l2_leaf_reg": 13.614734408617593,
+   "random_strength": 0.012544213378224287,
+   "subsample": 0.6644739198972989,
+   "rsm": 0.4759276699561325
+  },
+  "source": "Optuna re-tune under test-mimicking CV, pick centroid10",
+  "weighting": "none",
+  "n_seeds": 3,
+  "final_fit": "refit on ALL training rows (no early stopping), mean of 3 seeds",
+  "tuned_candidate": {
+   "iterations": 823,
+   "learning_rate": 0.02562740498192113,
+   "depth": 7,
+   "l2_leaf_reg": 13.614734408617593,
+   "random_strength": 0.012544213378224287,
+   "subsample": 0.6644739198972989,
+   "rsm": 0.4759276699561325
+  },
+  "cv_5x5_v1_67feats": {
+   "tuned": 0.83452,
+   "teammate": 0.83321,
+   "diff": 0.00131,
+   "pos": "4/5"
+  },
+  "cv_5x5_v2_55feats": {
+   "tuned": 0.83461,
+   "teammate": 0.83226,
+   "diff": 0.00235,
+   "pos": "5/5"
+  }
+ },
+ "et": {
+  "params": {
+   "n_estimators": 400,
+   "max_depth": 19,
+   "min_samples_leaf": 3,
+   "max_features": 0.6547471590949188,
+   "criterion": "entropy"
+  },
+  "source": "teammates best_params_v3.json (re-tune not robustly better)",
+  "weighting": "none",
+  "n_seeds": 3,
+  "final_fit": "refit on ALL training rows (no early stopping), mean of 3 seeds",
+  "tuned_candidate": {
+   "n_estimators": 500,
+   "max_depth": 36,
+   "min_samples_leaf": 4,
+   "max_features": 0.2811392970554938,
+   "criterion": "gini"
+  },
+  "cv_5x5_v1_67feats": {
+   "tuned": 0.83226,
+   "teammate": 0.83212,
+   "diff": 0.00014,
+   "pos": "2/5"
+  },
+  "cv_5x5_v2_55feats": {
+   "tuned": 0.83427,
+   "teammate": 0.83334,
+   "diff": 0.00092,
+   "pos": "3/5"
+  }
+ }
+}

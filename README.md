@@ -1,123 +1,194 @@
-# CS155 miniproject 1: Spotify popularity
+# CS155 miniproject 1: final blends 19 and 21
 
-This package reproduces the project's best observed submission: a five-fold ensemble of **60% CatBoost and 40% Extra Trees**. The saved inverted submission received **0.13113 AUC** on the public leaderboard (equivalent to 0.86887 AUC for the corresponding non-inverted High scores, for the same rows and labels). The five-fold mean validation AUC for the High scores was **0.86234**. The validation result is selection-biased: the same training labels informed earlier model and feature choices.
+This branch (`final-models-19-21`, created from `charlie`) contains our modelling code and the two submissions with the best public-leaderboard scores. Charlie's original README, which documents `reproduce.py` and his model, is kept as [`README_charlie.md`](README_charlie.md).
 
-## Setup
+| File | What it is (weights of a rank average) | Public LB AUC | Offline AUC |
+|---|---|---|---|
+| `final_submissions/21_chxCat60_charlieGraphET20_lgblinear20.csv` | 0.60 **X** + 0.20 **ET** + 0.20 **LL** | **0.87475** | 0.8450 |
+| `final_submissions/19_charlieGraphET28_chxCat40_lgblinear24_charlie8.csv` | 0.40 **X** + 0.28 **ET** + 0.24 **LL** + 0.08 **Charlie** | **0.87420** | 0.8462 |
+| `final_submissions/v2_primary.csv` (our best model offline) | equal-weight rank average of 8 models | 0.86560 | **0.8476** |
+| `final_submissions/reference_60_40_confirmed_positive.csv` (Charlie's model) | 0.6 CatBoost + 0.4 Extra Trees | 0.86886 | 0.8388 (our re-implementation) |
 
-The reproduced run used Linux x86-64, Python **3.14.8**, 8 CPU threads, an Intel Core Ultra 5 125H, and 30 GiB of system RAM. It did not use a GPU. These describe the machine used, not minimum hardware requirements. The exact Python package versions are in `requirements.txt`. Numerical results may differ across package versions, platforms, and hardware.
+The components are:
 
-From this directory, with Python 3.14 available:
+- **X** = `r3_chx_c_cat`: Charlie's CatBoost, given a label-free album-cluster ID as a categorical feature.
+- **ET** = `r3_chg_hc2_et`: Charlie's Extra Trees, given one extra graph label-propagation feature (`g_hc2`).
+- **LL** = `zoo_lgb_linear`: a LightGBM with linear models in its leaves, trained on our own feature set.
+- **Charlie** = Charlie's submitted predictions, used as they are.
+
+Each is described below.
+
+**Offline AUC** is the out-of-fold ROC AUC over 5 repeats of 5-fold cross-validation (`harness.make_splits`, `seed0=1000`), computed only on "eligible" validation rows. These are the rows that could have been in the test set (see [Validation](#validation)). The rank average is rebuilt from each component's out-of-fold predictions with the same weights. **Public LB AUC** is the Kaggle public leaderboard, which uses part of the 863 test rows. The private leaderboard uses the remaining rows, and only the private leaderboard is graded.
+
+**Selection bias.** Files 19 and 21 were found through about 15 public submissions, each informing the next (see [How we got there](#how-we-got-there)). Their public scores are therefore optimistic estimates of their private scores. The offline AUC does not use any public-leaderboard information. By that measure the three files are close, and `v2_primary` is best. This is why we recommended selecting `v2_primary` + `21` as the two final Kaggle submissions: one trusts cross-validation, the other trusts the public leaderboard. Kaggle scores the better of the two on the private set.
+
+## Rules
+
+- **Data:** only the competition data, `data/train.csv`, `data/test.csv` and `data/sample_submission.csv`.
+- **No pretrained or foundation models.** We tried TabPFN early on and dropped it once the course rule was clarified. TabPFN code, and the scripts that evaluated blends containing TabPFN, are not included in this branch, and no component of 19, 21 or `v2_primary` uses it. The only neural network is the small MLP inside `v2_primary`, which is trained from scratch (`work/mdl/`).
+- **Test covariates.** Like Charlie's pipeline, some label-free features (neighbourhood, density and graph structure) are computed on pooled train and test covariates. No test labels exist or are used.
+
+## The components of 19 and 21
+
+All three model components are scored with the same validation scheme (5 repeats × 5 folds, eligible rows only; see [Validation](#validation)). Each saves out-of-fold predictions plus test predictions from full refits on all 3,863 training rows. The offline AUCs below are for each component alone.
+
+### X: `r3_chx_c_cat` (weight 0.40 in 19, 0.60 in 21)
+
+This is Charlie's final pipeline with only the CatBoost family kept, plus one new input: `c_alb`, a label-free album-cluster ID used as a native CatBoost categorical.
+
+- **Builders:** `work/r3_chx/chx.py` and `chx_lib.py`. The pipeline logic is copied unchanged from our re-implementation of Charlie's model in `work/ch/`.
+- **Inputs:**
+  - Charlie's 115-column label-free view (`ch_feats.charlie_pool`, computed on the pooled train and test rows).
+  - Six fold-local grouped date target encodings: year, year-month and exact-date High rates with smoothing 2, plus log counts. Fit rows are cross-fitted with `StratifiedGroupKFold(5)` over connected groups (same URI or identical 13-dimensional audio vector).
+  - `c_alb`.
+  - Median imputation, fitted on the fit rows.
+- **`c_alb`** (`work/te/label_features.py`, `album_ids`): within each release-date string, the distinct songs of the train and test pool are clustered by average linkage on 9 standardised audio columns, cutting at distance 2.5. This gives 3,294 IDs and uses no labels. CatBoost's target statistics for the category come only from the labels of the rows it is fitted on.
+- **Model:** CatBoost with Charlie's parameters (2,000 iterations, learning rate 0.00888, depth 9, l2 9.88, rsm 0.472, random strength 0.605, Logloss).
+- **Same-date residual correction** (Charlie's): residuals come from an inner 3-fold over the fit rows. A Gaussian audio kernel over other songs with the same release date then gives `p = clip(raw + 0.35·corr, 0, 1)`.
+- **Test predictions:** `test_full` is the mean of 6 full refits.
+- **Offline AUC:** 0.8378 alone, which is +0.0011 over the replica's CatBoost and positive in 5 of 5 repeats. The gain is concentrated on rows whose album cluster contains labelled songs. That share is slightly higher in test (0.38) than in CV (0.34).
+- **Leakage audit:** flipping every validation label left validation and test predictions bit-identical (`work/r3_verify/r3_chx_mix_ca/catfull_k0.out` and `catfull_k20.out`). Shuffling the fit labels gave AUC ≈ 0.50 (`work/r3_verify/chx_c/dyn_FS.out`).
+
+### ET: `r3_chg_hc2_et` (weight 0.28 in 19, 0.20 in 21)
+
+This is Charlie's Extra Trees on the same 115 + 6 columns, plus one new column, `g_hc2`, with Charlie's residual correction (α = 0.15, bandwidth 3).
+
+- **Builders:** `work/r3_chg/chg.py` fits both of Charlie's halves with `g_hc2` added. `work/r3_chg/save_comp.py` writes `_cat`, `_et` (this block) and mixes such as `_w6` = 0.4 CatBoost + 0.6 ET.
+- **Model:** `ExtraTreesClassifier(n_estimators=900, max_depth=15, min_samples_leaf=2, max_features≈0.183)`. Each song's rows are weighted 1 / (number of copies of its URI).
+- **`g_hc2`** (`work/r3_chg/graph_lib.py`, `work/r3_chg/graph_specs.py`): harmonic label propagation on a label-free song graph over all train and test songs, with one node per distinct URI.
+  - Edges join songs with the same release-date string, weighted `0.3·exp(-0.5·(‖Δz‖/1.5)²)` on audio. They also join symmetrised 20 nearest neighbours in audio and release-year space, weighted `0.25/(d+0.25)`.
+  - Only fit-row labels are used as seeds.
+  - Fit rows get out-of-fold values from an inner 5-fold grouped by URI, so a song never seeds itself.
+  - The column is recomputed inside every residual-correction inner split.
+- **Test predictions:** `test_full` is the mean of 3 full refits.
+- **Offline AUC:** 0.8387 alone. On average that matches Charlie's full 0.6/0.4 replica blend (0.8388) and is +0.0086 over the replica's Extra Trees (5 of 5 repeats).
+- **Leakage audit** (`work/r3_verify/r3_chg_hc2_w6/`):
+  - Flipping validation labels left every input matrix and every output bit-identical (`valflip_k0.out`, `valflip_k15.out`).
+  - Permuting fit labels gave AUC 0.50–0.54 (`fitperm_k0_s777.out`, `fitperm_k15.out`).
+
+### LL: `zoo_lgb_linear` (weight 0.24 in 19, 0.20 in 21)
+
+This is LightGBM with linear models in its leaves (`linear_tree=True`, `linear_lambda=1.0`), using the teammates' tuned LightGBM parameters (`work/main/final_params.json`: 662 trees, learning rate 0.0165, 30 leaves, depth 9). It is model `lgb_linear` in `work/r2_zoo/zoo.py`.
+
+- **Inputs:** the 61 columns of `work/main/final_cv.py`.
+  - **58 label-free features**, computed on the pooled train and test rows:
+    - 13 raw audio features;
+    - 4 release-date features;
+    - trend (3) and seasonality (15) features;
+    - same-date, month and year counts (4);
+    - album-neighbour distances (6);
+    - era-detrended audio (10);
+    - date-density ratios (3).
+  - **3 out-of-fold label features** (`work/te/label_features.py`, `BEST_SPEC`):
+    - the distance-weighted High rate of the 40 nearest labelled songs released within ±1 year;
+    - a smoothed exact-date target encoding;
+    - the number of labelled songs with the same release date.
+
+    Rows with the same URI are always excluded. Fit rows get inner out-of-fold values; validation and test rows are encoded from fit-row labels only.
+- **Seeds:** 3 per fold. `test_full` is the mean of 3 full refits.
+- **Offline AUC:** 0.8425 alone, which is +0.0037 vs the Charlie replica (5 of 5 repeats). The same LightGBM without linear leaves scores 0.8408.
+- **Selection note:** it was picked from about 13 learner variants screened on the same splits.
+
+### Charlie: `final_submissions/reference_60_40_confirmed_positive.csv` (weight 0.08 in 19)
+
+This is Charlie's submitted file from this branch (`reference/submission_inverted.csv`), converted to High-class scores as `1 − Popularity_Type`. In cross-validation it is represented by our faithful replica `chrep_bl` (`work/ch/chfull.py` + `work/main/hedge_eval.py`; CV 0.8388). `chrep_bl`'s `test_full` is Charlie's actual file.
+
+## Reproducing the submission files
+
+All commands run from the repository root, because the scripts use paths relative to it.
 
 ```bash
-python3.14 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-OPENBLAS_NUM_THREADS=1 python -u reproduce.py --threads 8 --out output
+python3 -m venv .venv && source .venv/bin/activate
+python -m pip install -r work/requirements.txt
 ```
 
-The script runs on CPU. Training and the inner models used for residual correction can take several minutes; time depends on the machine. It checkpoints each completed model fold in `output/`. If interrupted, run the same command again to reuse those folds. Use a new output directory if changing the data, model code, dependencies, or thread count.
+### 1. Rebuild 19 and 21 from saved predictions (seconds)
 
-The input files are provided at `data/train.csv` and `data/test.csv`. Their SHA-256 hashes are:
+`work/results/<name>.npz` stores each component's out-of-fold predictions (`oof`) and its full-refit test predictions (`test_full`). `work/main/blendfile.py` builds a weighted rank average: `p = Σ w_i · rank(v_i) / 863`, with SciPy average ranks and weights normalised to sum to 1. The token `ch` means the `Popularity_Type` column of `final_submissions/reference_60_40_confirmed_positive.csv`; any other token means `test_full` from `work/results/<token>.npz`.
 
-```text
-d14b372deff47aa791242875ac5c134ce2497695bb190479b159b8ec49d68407  data/train.csv
-70f1502ccae76396b45961a0e0c9f96c5ba213d5b99a101015c32ddc65d020e3  data/test.csv
+```bash
+python -I work/main/blendfile.py 21_rebuilt "r3_chg_hc2_et:0.20,zoo_lgb_linear:0.20,r3_chx_c_cat:0.60"
+python -I work/main/blendfile.py 19_rebuilt "r3_chg_hc2_et:0.28,ch:0.08,zoo_lgb_linear:0.24,r3_chx_c_cat:0.40"
 ```
 
-The output files are:
+These write `submissions/21_rebuilt.csv` and `submissions/19_rebuilt.csv`. We checked that both are identical (max abs difference 0.0) to the submitted files in `final_submissions/`.
 
-- `output/submission_inverted.csv`: the leaderboard submission format, with `ID` and `Popularity_Type` columns.
-- `output/submission_positive.csv`: corresponding High-class scores before inversion.
-- `output/metrics.json`: fold AUCs and the largest absolute difference from the included reference submission.
-- `reference/submission_inverted.csv`: the exact previously submitted file, included for comparison. Its SHA-256 is `33f5be1734f2fe579814f6fa349cbbf5613a470c2dfd17168603ed9ced738756`.
+`final_submissions/reference_60_40_confirmed_positive.csv` is exactly `1 − reference/submission_inverted.csv`. It is Charlie's submitted file converted to High-class scores. The inverted file scores 0.131 on the leaderboard, so never submit it.
 
-The reference file can be inspected immediately; executing the script retrains the ten outer-fold models rather than loading fitted models. The output comparison reports numerical differences instead of assuming identical results across environments.
+### 2. Retrain the components (minutes to hours, CPU only)
 
-## How the model works
+These commands rebuild each component's `work/results/*.npz` from scratch. They were originally run from inside each folder with absolute paths. In this branch the paths are relative to the repository root, so run them from the root. We verified the rebuild in step 1 in this layout, but did not re-run these long jobs here.
 
-The training data has 3,864 labeled rows; the test data has 863 rows with no labels. The core inputs include 13 numerical Spotify audio attributes and release-date information. The pipeline derives calendar features, same-date song counts, audio neighborhood statistics, and music-category features. It also builds smoothed target encodings for release year, month, and exact date.
+```bash
+mkdir -p work/r2_zoo/cache work/r2_zoo/raw work/r3_chg/cache work/r3_chx/cache work/ch/cache   # caches are not in git
 
-The label-free feature builder **pools training and test covariates** to compute some neighborhood, density, and scaling features. No test labels are used. Check whether this use of test covariates is permitted under the applicable project rules. Missing audio is imputed for model fitting; a row with all audio missing is excluded as an audio neighbor.
+# LL: zoo_lgb_linear (about 5 minutes)
+OMP_NUM_THREADS=2 NJ=2 DO_FULL=1 python -I work/r2_zoo/zoo.py run 1000 5 zoo 3 lgb_linear
 
-Rows sharing a Spotify URI or an identical complete audio vector are grouped. `StratifiedGroupKFold` makes five folds using split seed `20261171`; each song group remains in one fold. The year/month/date target encodings are fitted on the training portion of each outer fold, with grouped cross-fitting for its training rows. The residual correction also uses grouped inner cross-fitting, with encodings rebuilt inside each inner training split.
+# ET: r3_chg_hc2_et (about 2-3 hours on 1 thread; fits both of Charlie's halves)
+python -I work/r3_chg/chg.py cv hc2 hc2 0 25 1 full
+python -I work/r3_chg/chg.py fullfit hc2 hc2 0,1,2 1
+OMP_NUM_THREADS=1 python -I work/r3_chg/save_comp.py hc2 r3_chg_hc2 0.6 0.7   # writes r3_chg_hc2{,_cat,_et,_w6,_w7}
 
-For each fold, one CatBoost classifier and one Extra Trees classifier train on the other four folds. Their out-of-fold scores provide the validation AUC. Each model also predicts every test row. The five CatBoost test predictions are averaged, as are the five Extra Trees predictions, then the two averages are combined:
-
-```text
-High score = 0.60 × mean(CatBoost fold scores) + 0.40 × mean(Extra Trees fold scores)
-submission score = 1 − High score
+# X: r3_chx_c_cat (several hours; CatBoost takes about 3-6 minutes per fold, plus 3 inner fits)
+python -I work/r3_chx/chx.py cv c 0 25 2
+python -I work/r3_chx/chx.py full c 0,1,2,3,4,5 2
+OMP_NUM_THREADS=1 python -I work/r3_chx/chx.py save c   # writes r3_chx_c, r3_chx_c_cat, r3_chx_c_et
 ```
 
-Both components include a same-release-date residual correction based on similar songs. For Extra Trees, copies of a song are downweighted by inverse occurrence count; CatBoost uses equal row weights. These are fold models trained on roughly 80% of rows each, not models refitted on the full training set. The project instructions describe High as class 1; the inverted file is included because the submitted objective was to minimize the AUC of inverted scores. Use the positive file if the evaluation expects larger scores for High.
+`save_comp.py` checks its outputs against the Charlie replica file `work/results/chrep_bl.npz`. `chx.py save` also checks against `chrep_cat.npz` and `chrep_et.npz`. All three are included. The replica itself comes from `work/ch/chfull.py cv std K0 K1` (25 folds) followed by `work/main/hedge_eval.py`. Runs at 1–2 threads were bit-reproducible with the package versions in `work/requirements.txt` (Python 3.11).
 
-### CatBoost and Extra Trees
+## Validation
 
-A decision tree predicts by asking a sequence of questions about the inputs, such as whether energy is above a threshold or whether the release was before a given year. A leaf at the end of the path supplies a prediction.
+- **Why "eligible" rows** (`work/harness.py`, `make_splits`):
+  - The organisers split the original rows about 80/20, then removed every test row whose Spotify URI also appears in train. So test songs are essentially all singletons.
+  - Train still contains extra copies of multi-playlist songs, which are mostly High.
+  - Each CV repeat therefore uses `StratifiedKFold(5, shuffle=True, random_state=1000+r)`, but only scores validation rows whose URI does not occur in that fold's fit rows. That is about 3,500 of 3,863 rows per repeat.
+  - Grouped CV that scores every duplicate overstates AUC: 0.852 vs 0.833 for the same LightGBM.
+- **Leakage audits:**
+  - X and ET passed full-model label-flip tests: flipping all validation labels leaves validation and test predictions bit-identical.
+  - They also passed fit-label permutation tests (AUC ≈ 0.5). These audits are in `work/r3_verify/`.
+  - For LL, the label features are checked by `work/te/test_leakage.py` (flipping validation labels changes nothing), and LightGBM is fitted on fit rows only.
+- **Confirmation splits:** gains were re-checked on fresh split seeds (`seed0=9000` and `seed0=11000`) where noted in the code (`conf_*`, `c9`, `c11`).
+- **Selection effects** (not leakage): several choices were made by looking at the same std splits. These include the `g_hc2` graph settings, the choice of linear-leaf LightGBM from the learner zoo, and Charlie's correction parameters. The 19/21 blend weights were chosen with public-leaderboard feedback. Expect true private-set AUCs slightly below the offline numbers, and well below the public scores of 19 and 21.
 
-**CatBoost** is a gradient-boosted tree model. It builds trees sequentially: each new tree adjusts the combined prediction to reduce the training loss. In this project the loss is binary log loss, while models are evaluated using ROC AUC. The reference uses 2,000 trees, depth 9, and a small learning rate of approximately 0.008885. L2 regularization and feature subsampling control how the trees are fitted. CatBoost outputs a score for the High class.
+## How we got there
 
-**Extra Trees** fits many trees independently. At each split it considers a randomly selected subset of features and randomized candidate thresholds, then selects a useful split from those candidates. It averages its trees' class probabilities. The reference uses 900 trees, maximum depth 15, and a minimum of two training rows per leaf. Scikit-learn's `ExtraTreesClassifier` uses `bootstrap=False` here: each tree is fitted using the fold's training rows with the configured sample weights. This randomness is separate from the five-fold ensemble.
+1. **Cross-validation that mirrors the test set.** We found that the test set is a random 20% of the original rows, with every test row whose Spotify URI also occurs in train removed. `harness.make_splits` copies this: each validation fold is scored only on rows whose URI does not occur in that fold's training rows.
+2. **Our own models (`v2_primary`).** We built about 165 configurations: gradient-boosted trees, Extra Trees and random forests, an MLP, label-free trend, density and graph features, and out-of-fold label features. The best combination offline was an equal rank average of 8 models: LightGBM and XGBoost with graph features, CatBoost with an album-cluster categorical, two Extra Trees, an MLP, and LightGBM and Extra Trees on Charlie's feature view. It scored 0.8476 offline, versus 0.8388 for Charlie's model, and the gain held up on two fresh split seeds. On the public leaderboard, however, it scored 0.8656, below Charlie's 0.8689.
+3. **Building on Charlie's model.** The public leaderboard favoured Charlie's exact ranking. We re-implemented his pipeline (`work/ch/`, the `chrep_bl` replica) and added improvements to it, each checked for leakage by flipping the validation labels and confirming that the predictions do not change:
+   - the `g_hc2` graph label-propagation feature (`work/r3_chg/`);
+   - an album-cluster categorical in CatBoost (`work/r3_chx/`);
+   - out-of-fold label features (`work/r3_chp/`);
+   - augmentation: noise, mixup and pseudo-labels (`work/r3_aug/`).
+4. **A public-leaderboard simulator** (`work/main/pubsim.py`). It draws thousands of random public-sized subsets of the eligible out-of-fold rows. Over those subsets it estimates the joint Gaussian distribution of every candidate blend's AUC difference from Charlie's model. It then conditions on all public scores observed so far, which gives each untested blend an expected public score and a standard deviation. The search scripts below inflate the covariance by `(1+g)/(1−g)`, with `g = npub/3521`, to account for the finite test pool. `npub` is a command-line argument; we used 431 and 259.
+5. **Adaptive search.** After each submission we added its score to the simulator and searched blends around the current best (`work/main/near02.py` … `near22.py`, `next_pick.py`). We chose the blend that maximised the expected best public score (`E[max(best so far, new)]`), considering several submissions together when more than one remained. Public scores of the files allowed under the rules, in order:
 
-CatBoost and Extra Trees can make different ranking errors, so the submission averages their corrected predictions at weights 0.60 and 0.40. The 0.60/0.40 split was selected through experiments on the training dataset; it is not a learned probability or a guarantee that the blend always improves AUC.
+   | File | Blend | Public AUC |
+   |---|---|---|
+   | Charlie | his model | 0.86886 |
+   | G40 | 0.6 Charlie + 0.4 graph LightGBM | 0.86977 |
+   | 02 | 0.6 graph-Charlie + 0.2 Charlie + 0.2 album CatBoost | 0.87079 |
+   | 11 | 0.40 graph-Charlie + 0.30 Charlie + 0.15 album CatBoost + 0.15 LL | 0.87183 |
+   | 12 | 0.35 graph-Charlie + 0.30 Charlie + 0.05 album CatBoost + 0.30 LL | 0.87202 |
+   | 18 | 0.32 ET + 0.24 Charlie + 0.24 LL + 0.20 X | 0.87318 |
+   | 19 | 0.28 ET + 0.08 Charlie + 0.24 LL + 0.40 X | 0.87420 |
+   | 21 | 0.20 ET + 0.20 LL + 0.60 X | 0.87475 |
 
-### The 121 input features
+   Here "graph-Charlie" = `r3_chg_hc2_w6`, which is 0.4 × its CatBoost half + 0.6 × its Extra Trees half (ET), and "album CatBoost" = `zoo_cat_alb`. The other submitted variants scored lower: 01, 05 and 10 scored 0.8693–0.8695, and v2 + Charlie scored 0.8677. Two directions kept beating the simulator's predictions: more weight on X, and replacing Charlie's own file with his re-implemented model plus our additions.
 
-Each model receives **115 label-free features plus six target-encoding features**. The list below describes every input by its exact name or by an explicitly expanded naming pattern. The two models receive the same columns.
+## Repository layout (this branch)
 
-1. **13 audio and music inputs:** `time_signature`, `speechiness`, `danceability`, `duration_ms`, `energy`, `mode`, `instrumentalness`, `valence`, `key`, `tempo`, `loudness`, `acousticness`, and `liveness`.
+| Path | Contents |
+|---|---|
+| `work/harness.py` | Data loading, eligible-row CV splits (`make_splits`), saving and loading of `results/<name>.npz` |
+| `work/main/` | Final CV and v2 assembly (`final_cv.py`, `assemble.py`), blend file builder (`blendfile.py`), public-LB simulator (`pubsim.py`) and adaptive search (`near*.py`, `next_pick.py`), `final_params.json` |
+| `work/ch/` | Re-implementation of Charlie's pipeline |
+| `work/te/`, `work/fe/`, `work/gbm/`, `work/mdl/` | Label features (target encodings, kNN label rates), label-free features, tree models, MLP |
+| `work/r2_*` | Round-2 experiments: learner zoo (`r2_zoo`), graph features (`r2_graph`), label features (`r2_lab`), feature selection, distribution shift, … |
+| `work/r3_chg`, `work/r3_chx`, `work/r3_chp`, `work/r3_aug` | Round-3 variants of Charlie's pipeline: graph feature, album categorical, label features, augmentation |
+| `work/r3_verify` | Leakage audits: scripts and their outputs (`*.out`) |
+| `work/results/` | Saved predictions for the components of 19, 21 and `v2_primary`, plus the Charlie replica `chrep_bl` |
+| `final_submissions/` | The submitted files above |
 
-2. **19 calendar inputs:** `release_year`, `release_month`, `release_day`, `weekday`, `day_of_year`, `release_quarter`, `fractional_year`, `decade`, `is_jan1`, `is_friday`, `is_tuesday`, `is_summer`, `is_holiday`, `month_sin`, `month_cos`, `weekday_sin`, `weekday_cos`, `day_of_year_sin`, and `day_of_year_cos`. The sine/cosine pairs represent cyclical positions, such as December being close to January. Missing or partial release dates have unavailable calendar components represented as missing.
-
-3. **Four release-density inputs:** `same_year_count`, `same_month_count`, `same_date_count`, and `same_date_tempo_count`. These count rows in the pooled train/test feature data sharing the corresponding date component; the tempo count uses tempo rounded to the nearest integer. Counts do not use labels and can include repeated rows. For an applicable date, the queried row is included in its own count.
-
-4. **Five same-date audio-neighbor inputs:** `near_count_1`, `near_count_1_5`, and `near_count_2` count other rows on the same complete release date within standardized audio distances of 1, 1.5, and 2, respectively. `nearest_same_date` and `second_nearest_same_date` are the distances to the closest and second-closest same-date rows. Distances use the 13 median-imputed, standardized audio/music inputs; the row itself is excluded. Repeated rows may still be neighbors. A row with all audio missing is not used as an audio neighbor.
-
-5. **26 same-date audio summary inputs:** for each of the 13 names in item 1, the model receives `same_date_mean_<name>` and `same_date_deviation_<name>`. The first is the mean value among rows with that complete release date; the second is the song's value minus that mean. For example, `same_date_deviation_energy` measures how far the song's energy is from its date's mean. The mean includes the row itself and uses the pooled train/test feature rows.
-
-6. **Two additional numeric inputs:** `loudness_energy_residual` is actual loudness minus the value predicted by a straight-line fit from energy, using available pooled train/test feature values. `year_density_percentile` is the percentile rank of `same_date_count` among rows from the same release year.
-
-7. **45 music-category indicators:** `key_is_0` through `key_is_11` (12 columns), `mode_is_0` and `mode_is_1` (2), `time_signature_is_1` through `time_signature_is_7` (7), and all 24 `key_<k>_mode_<m>` combinations for `k` from 0 through 11 and `m` in `{0, 1}`. An indicator is 1 when its category matches and 0 otherwise; missing source values remain missing.
-
-8. **One cyclic key-neighbor input:** `nearest_same_date_cyclic_key` is the smallest combined production-and-key distance to another same-date row with a known key. It combines standardized differences in energy, loudness, acousticness, and log-transformed instrumentalness with the shorter key distance around the 12-key circle, divided by 3. Thus keys 0 and 11 are one step apart in the key component.
-
-9. **Six grouped date-target inputs:** `date_te_year`, `date_te_month`, and `date_te_exact` are smoothed estimates of the High-label fraction for the song's release year, year/month, and exact date. Each uses the training-fold High fraction as a prior with smoothing strength 2. `date_count_year`, `date_count_month`, and `date_count_exact` are `log(1 + count)` for those same groups. The counts and estimates use only the relevant labeled training partition. Training-row values are group-cross-fitted, so a song and its grouped duplicates cannot contribute their labels to their own encoding.
-
-The counts add up to `13 + 19 + 4 + 5 + 26 + 2 + 45 + 1 + 6 = 121`. The feature adapter selects the base and `secondary` groups from `similarity.py`. Other experimental groups calculated in that file, such as cluster, cross-date, and tempo-ambiguity features, are **not** passed to this reference model. Rows with missing numeric inputs are median-imputed using the relevant training fold before model fitting.
-
-### Residual correction
-
-A **prediction residual** is the observed label minus a model's predicted High score. For example, if a song's label is 1 and the model predicted 0.7, its residual is +0.3: the model scored that song lower than its label. A negative residual means the score was higher than the label. These residuals are distinct from the `loudness_energy_residual` input described above.
-
-For each outer fold and each model family, the pipeline:
-
-1. Splits that fold's training rows into three **grouped inner folds**. It trains on two inner folds and predicts the third, repeating until every outer-training row has a prediction from an inner model that did not train on that row's song group. Date target encodings are rebuilt inside each inner fit.
-2. Calculates `label - inner_prediction` for those outer-training rows. It averages residuals for repeated copies of a URI so one URI contributes one reference residual. Rows without a URI or usable audio are excluded from the correction reference.
-3. For a validation or test song with a complete release date and usable audio, finds reference songs on the **same exact date**. It median-imputes and standardizes the 13 audio/music columns using the correction reference, then measures Euclidean audio distance. A neighbor at distance `d` receives weight `exp(-0.5 × (d / bandwidth)²)`.
-4. Computes `sum(weight × residual) / (shrinkage + sum(weight))`, multiplies by the correction strength, adds it to the model's High score, and clips the result to `[0, 1]`. With no eligible neighbors, the correction is zero.
-
-The CatBoost correction uses bandwidth **0.75**, shrinkage **10**, and strength **0.35**. Extra Trees uses bandwidth **3**, shrinkage **3**, and strength **0.15**. Larger shrinkage pulls corrections toward zero when little neighbor evidence is available. The two corrected model scores are then blended as described above. Similar same-date audio is an approximation; it does not establish that tracks share an album.
-
-
-The exact configurations are in `reference/model_config.json`. Key settings:
-
-| Setting | CatBoost | Extra Trees |
-|---|---:|---:|
-| Trees | 2,000 | 900 |
-| Depth | 9 | 15 |
-| Learning rate | 0.0088846 | — |
-| L2 | 9.8833 | — |
-| Feature subsampling | 0.4717 | 0.1827 |
-| Minimum leaf size | — | 2 |
-| Residual strength | 0.35 | 0.15 |
-| Duplicate weight power | 0 | 1 |
-| Blend weight | 0.60 | 0.40 |
-
-## Files
-
-- `reproduce.py`: runs the folds, blend, score inversion, and reference comparison.
-- `spotify_day_search/spotify_day_search/`: model training, grouped splitting, and feature adapter.
-- `experiments/`: feature construction and grouped target-encoding code used by the model.
-- `data/`: provided train and test CSVs.
-- `reference/`: model configuration, historical validation results, and submitted prediction file.
-
-No Spotify links or external data are needed to run the pipeline.
+The code was developed in a scratch directory. Absolute paths were rewritten to paths relative to the repository root. Only the final components' result files and none of the caches are included, so exploratory scripts that read other `results/` or `cache/` files need those inputs regenerated first. Some old run scripts, such as `work/v2logs/*.sh`, `cd` into a subfolder and so no longer match the root-relative paths. Docstrings that mention an "agent" refer to the parallel work streams used during development. Retraining `v2_primary` also needs `torch` (for its MLP) and `interpret` (for `work/mdl/ebm_cv.py`); neither is in `work/requirements.txt`.

@@ -1,0 +1,20 @@
+keys ['aucs', 'oof', 'test_foldavg', 'test_full'] oof (5, 3863) test_full (863,) foldavg (863,)
+aucs [0.83552 0.8409  0.83865 0.84423 0.83869] mean 0.8396
+chrep_bl aucs [0.83441 0.83977 0.83801 0.84343 0.83812] mean 0.83875 diff [0.0011  0.00113 0.00065 0.0008  0.00057] mean diff 0.00085
+r3_chx_c_cat: aucs mean 0.83776 vs 0.83665; oof maxdiff vs replica 0.223; NaN pattern equal True
+r3_chx_c_et: aucs mean 0.83015 vs 0.83015; oof maxdiff vs replica 3.33e-16; NaN pattern equal True
+NaN pattern equal to chrep_bl (all reps): True  non-NaN per rep [3538 3516 3525 3535 3491]
+non-NaN == harness eligible rows: True
+oof recomputed from cache maxdiff 0.0  test_foldavg maxdiff 0.0
+recomputed aucs [0.83552 0.8409  0.83865 0.84423 0.83869]
+ET vs replica per-fold maxdiff: val 3.33e-16 test 2.22e-16 ip 2.22e-16; cat_v spearman vs replica cat_v mean 0.9931 min 0.9907
+full-refit files ['c_full_s0.npz', 'c_full_s1.npz', 'c_full_s2.npz', 'c_full_s3.npz', 'c_full_s4.npz', 'c_full_s5.npz'] keys ['cat_ip', 'cat_raw_t', 'cat_t', 'et_ip', 'et_raw_t', 'et_t']
+test_full == 0.6 mean(cat_t) + 0.4 mean(et_t) over full seeds: maxdiff 0.0
+ip length of full refit (should be n=3863): [3863, 3863, 3863, 3863, 3863, 3863]
+seed-to-seed spearman of full cat_t: [0.994  0.995  0.9948 0.9953 0.9949]
+test_full vs test_foldavg: corr 0.9972 spearman 0.9972 maxdiff 0.0935
+Spearman(test_full, Charlie file) 0.9938 ; Spearman(chrep_et test_full, r3_chx_c_et test_full) 0.9975
+test uris in train: 0 / 863
+album shared with labelled rows: test rows 0.379; CV eligible val rows mean 0.337 (min 0.315, max 0.361)
+release date shared with labelled rows: test 0.722; CV eligible val 0.690
+per-fold AUC gain (c - replica): album-shared rows +0.00329; non-shared rows -0.00031

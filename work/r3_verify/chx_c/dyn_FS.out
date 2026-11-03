@@ -1,0 +1,19 @@
+fold 0: fit 3090 val 773 elig 716
+  true-label reduced run: bl val AUC elig 0.82912 cat 0.82228 et 0.83087 (11s)
+[flip] matrices maxdiff fit 0 val 0 test 0
+[flip] bl_t       maxdiff 1.11e-16
+[flip] bl_v       maxdiff 1.11e-16
+[flip] cat_ip     maxdiff 0
+[flip] cat_raw_t  maxdiff 0
+[flip] cat_raw_v  maxdiff 0
+[flip] cat_t      maxdiff 0
+[flip] cat_v      maxdiff 0
+[flip] et_ip      maxdiff 2.22e-16
+[flip] et_raw_t   maxdiff 1.11e-16
+[flip] et_raw_v   maxdiff 1.67e-16
+[flip] et_t       maxdiff 1.11e-16
+[flip] et_v       maxdiff 1.67e-16
+[flip] done (23s)
+[shuffle seed 12345] val AUC elig (true labels): cat_raw_v 0.5084  cat_v 0.5081  et_v 0.4879  bl_v 0.5043  (18s)
+[shuffle seed 777] val AUC elig (true labels): cat_raw_v 0.4872  cat_v 0.4872  et_v 0.5073  bl_v 0.4957  (38s)
+[shuffle] null SE ~ 0.0233

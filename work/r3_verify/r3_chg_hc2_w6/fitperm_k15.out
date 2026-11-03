@@ -1,0 +1,8 @@
+fold 15: n_fit 3090 n_val 773 n_elig 711
+cached fold AUCs (true labels): {'cat_raw_v': 0.84547, 'et_raw_v': 0.84082, 'cat_v': 0.84551, 'et_v': 0.841, 'w6_blend': 0.84723}
+  frac fit labels changed: 0.44336569579288027  val labels unchanged: True
+  cat done 209.0s
+  extra done 18.8s
+  standalone g_hc2 val AUC under fit-perm: 0.52257  date-TE cols: [0.5378, 0.4666, 0.5042]
+fitperm AUCs (TRUE val labels): {'cat_raw_v': 0.53425, 'et_raw_v': 0.53575, 'cat_v': 0.53393, 'et_v': 0.53308, 'w6_blend': 0.53764}
+total 235.8s
