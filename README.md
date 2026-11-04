@@ -121,3 +121,7 @@ The exact configurations are in `reference/model_config.json`. Key settings:
 - `reference/`: model configuration, historical validation results, and submitted prediction file.
 
 No Spotify links or external data are needed to run the pipeline.
+
+## Reproduction notebook
+
+`reference_model.ipynb` contains the model notes, exploratory plots, feature list, training invocation, ROC/AUC visualizations, and a comparison with the saved submission. Install the notebook dependencies in the same Python 3.14 environment with `python -m pip install -r requirements-notebook.txt`, start `jupyter lab` from this directory, and run the notebook cells in order. The training cell calls `reproduce.py` and caches completed folds under `output_notebook/`; generated figures are in `output_notebook/figures/`. The notebook compares its predictions to the saved reference and reports exact equality and numerical difference. It does not require test labels or external Spotify data.
